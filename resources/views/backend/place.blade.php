@@ -83,8 +83,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary" id="save" value="create">Simpan <i class="fa fa-send"></i></button>
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="save" value="create">Simpan <i class="fa fa-send"></i></button>
+                    </div>
+                </div>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -98,6 +105,8 @@
 		// Function DataTable
 		var table = $('#table').DataTable({
 			serverSide: true,
+            responsive: true,
+            autoWidth: true,
 			ajax: '{{ route('place.index') }}',
 			columns: [
 				{data: 'DT_RowIndex', name: 'DT_RowIndex'},

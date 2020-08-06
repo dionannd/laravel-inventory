@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Cashout;
+use App\Models\Income;
 use App\Models\Finance;
 use DataTables;
 use Validator;
 
-class CashoutController extends Controller
+class IncomeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,8 +19,8 @@ class CashoutController extends Controller
     {
         $finance = Finance::all();
         if ($request->ajax()) {
-            $cashout = Cashout::with('finance');
-            return DataTables::of($cashout)
+            $income = Income::with('finance');
+            return DataTables::of($income)
             ->addIndexColumn()
             ->addColumn('action', function($row){
                 $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="icon-bin"></i></a>';
@@ -35,7 +35,7 @@ class CashoutController extends Controller
             })
             ->make(true);
         }
-        return view('backend.cashout', compact('finance'));
+        return view('backend.income', compact('finance'));
     }
     
     /**
@@ -59,7 +59,7 @@ class CashoutController extends Controller
                 'error'    => 'Kesalahan saat mengisi form!'
             ], 422);
         }
-        $cashout = Cashout::updateOrCreate([
+        $income = Income::updateOrCreate([
             'id'            => $request->id
         ],[
             'expense'       => $request->expense,
@@ -67,12 +67,12 @@ class CashoutController extends Controller
             'desc'          => $request->desc,
             'nominal'       => $request->nominal
         ]);
-        if ($cashout){
+        if ($income){
             $finance = Finance::where('id', $request->finance_id)->first();
-            $result = $finance->balance - $request->nominal;
+            $result = $finance->balance + $request->nominal;
             $finance->update(['balance' => $result]);
             return response()->json([
-                'success'  => 'Data berhasil disimpan!'
+                'success'  => '<i class="fa fa-clock-o"></i> Data berhasil disimpan!'
             ], 200);
         } else {
             return response()->json([
@@ -89,8 +89,8 @@ class CashoutController extends Controller
      */
     public function edit($id)
     {
-        $cashout = Cashout::find($id);
-        return response()->json($cashout);
+        $income = Income::find($id);
+        return response()->json($income);
     }
 
     /**
@@ -101,10 +101,10 @@ class CashoutController extends Controller
      */
     public function destroy($id)
     {
-        $cashout = Cashout::find($id)->delete();
-        if ($cashout) {
+        $income = Income::find($id)->delete();
+        if ($income) {
             return response()->json([
-                'success'   => 'Data berhasil dihapus!'
+                'success'   => '<i class="fa fa-clock-o"></i> Data berhasil dihapus!'
             ], 200);
         } else {
             return response()->json([
@@ -113,3 +113,4 @@ class CashoutController extends Controller
         }
     }
 }
+

@@ -3,83 +3,105 @@
 @section('title', 'Pelanggan')
 
 @section('content')
-<!-- Page header -->
-<div class="page-header page-header-light border-bottom-1 border-bottom-primary">
-    <div class="page-header-content header-elements-md-inline">
-        <div class="page-title d-flex">
-            <h4><i class="icon-circle-left2 mr-2"></i> <span class="font-weight-semibold">Pelanggan</span></h4>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
-    <div class="breadcrumb-line breadcrumb-line-light header-elements-md-inline">
-        <div class="d-flex">
-            <div class="breadcrumb">
-                <a href="{{ route('home') }}" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
-                <span class="breadcrumb-item active">Pelanggan</span>
-            </div>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
+<!-- HEADER -->
+<div id="ribbon">
+    <span class="ribbon-button-alignment"> 
+        <span id="refresh" class="btn btn-ribbon" data-action="resetWidgets" data-title="refresh"  rel="tooltip" data-placement="bottom" data-original-title="<i class='text-warning fa fa-warning'></i> Warning! This will reset all your widget settings." data-html="true">
+            <i class="fa fa-refresh"></i>
+        </span> 
+    </span>
+    <ol class="breadcrumb">
+        <li>Home</li><li>Master Pengguna</li><li>Pelanggan</li>
+    </ol>
 </div>
-<!-- content area -->
-<div class="content">
-    <div class="card">
-        <div class="card-header bg-primary text-white header-elements-inline">
-            <h6 class="card-title"><span class="font-weight-semibold">Data Pelanggan</span></h6>
-            <a href="javascript:void(0)" class="btn btn-success" id="create">Tambah <i class="icon-file-plus2"></i></a>
+<!-- END HEADER -->			
+
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-users fa-fw "></i> 
+                    Master Pengguna
+                <span>>  
+                    Pelanggan
+                </span>
+            </h1>
         </div>
-        <div class="card-body">
-            <table class="table table-hover" id="table">
-                <thead>
-                    <tr>
-                        <th width="50px">No</th>
-                        <th>Nama Pelanggan</th>
-                        <th>No. Telp</th>
-                        <th>Email</th>
-                        <th>Alamat</th>
-                        <th width="140px" class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+            <ul id="sparks" class="">
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-success btn-flat"><i class="fa fa-file-excel-o"></i> Import / Export</a>
+                </li>
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-primary btn-flat" id="create"><i class="fa fa-plus"></i> Tambah Pelanggan</a>
+                </li>
+            </ul>
         </div>
     </div>
+    <section id="widget-grid" class="">
+        <div class="row">
+            <article class="col-xs-12 xol-sm-12 col-md-12 col-lg-12">
+                <table id="table" class="table table-striped table-bordered table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="30px">NO</th>
+                            <th>NAMA PELANGGAN</th>
+                            <th>NO. TELP</th>
+                            <th>EMAIL</th>
+                            <th>ALAMAT</th>
+                            <th width="80px" class="text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                </table>
+            </article>
+        </div>
+    </section>
 </div>
-<!-- modal -->
-<div id="modal" class="modal fade" data-backdrop="false" aria-hidden="true">
+<!-- Modal -->
+<div class="modal fade" id="modal" data-backdrop="false" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-success">
-                <h5 class="modal-title" id="modal-header"></h5>
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal-header"></h4>
             </div>
-            <form id="form" name="form" class="form-horizontal">
-                @csrf
-                <input type="hidden" name="id" id="id" value="">
-                <div class="modal-body">
+            <div class="modal-body">
+                <form id="form" name="form" class="form">
+                    @csrf
+                    <input type="hidden" name="id" id="id" value="">
                     <div class="form-group">
-                        <label>Nama Pelanggan</label>
+                        <label for="name">Nama Pelanggan:*</label>
                         <input type="text" id="name" name="name" placeholder="Masukan Nama Pelanggan" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>No. Hp</label>
+                        <label for="phone">No. Hp:*</label>
                         <input type="integer" id="phone" name="phone" placeholder="Masukan Nomor Telp" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
+                        <label for="email">Email:*</label>
                         <input type="email" id="email" name="email" placeholder="Masukan email" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Alamat</label>
-                        <input type="text" id="address" name="address" placeholder="Masukan alamat" class="form-control">
+                        <label for="address">Alamat:*</label>
+                        <textarea name="address" id="address" cols="3" rows="3" class="form-control" placeholder="Masukan Alamat"></textarea>
+                    </div>
+                    </div>
+                </form>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="save" value="create">Simpan <i class="fa fa-send"></i></button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn bg-primary" id="save" value="create">Simpan</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- END CONTENT -->
 @endsection
 
 @push('scripts')
@@ -88,14 +110,13 @@
         // Function DataTable
         var table = $('#table').DataTable({
             serverSide: true,
+            responsive: true,
+            autoWidth: true,
             ajax: '{{route('customer.index')}}',
             columns: [
-                {data: "id",
-                    render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart +1;
-                    }
-                },
-                {data: 'name', na{data: 'phone', name: 'phone'},
+                {data: 'DT_RowIndex'},
+                {data: 'name', name: 'name'},
+                {data: 'phone', name: 'phone'},
                 {data: 'email', name: 'email'},
                 {data: 'address', name: 'address'},
                 {data: 'action', orderable: false, searchable: false}
@@ -118,30 +139,29 @@
                 url: '{{route('customer.store')}}',
                 type: 'POST',
                 dataType: 'JSON',
-                success: function(data){
+                success: function(data) {
                     $('#save').html('Simpan');
                     $('#form').trigger('reset');
                     $('#modal').modal('hide');
-                    table.ajax.reload();
-                    swal({
-                        title: 'Berhasil!',
-                        text: data.success,
-                        type: 'success',
-                        buttonsStyling: false,
-                        confirmButtonClass: 'btn btn-primary'
+                    table.draw();
+					$.bigBox({
+                        title : "Berhasil!",
+                        content : data.success,
+                        color : "#739E73",
+                        timeout: 4000,
+                        icon : "fa fa-check",
                     });
                 },
                 error: function(data){
                     console.log('Error', data);
                     $('#save').html('Simpan');
-                    new Noty({
-                        theme: ' alert alert-warning alert-styled-left p-0',
-                        text: response.responseJSON.error,
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
+					$.smallBox({
+                        title : "Error!",
+                        content : "<i class='fa fa-clock-o'></i>Tolong isi semua form yang ada.",
+                        color : "#C46A69",
+                        iconSmall : "fa fa-exclamation-circle bounce animated",
+                        timeout : 4000
+                    });
                 }
             });
         });
@@ -162,46 +182,41 @@
         // Delete
         $('body').on('click', '.delete', function(){
             var id = $(this).data('id');
-            swal({
-                title: "Apa kau yakin?",
-                text: "Ingin menghapus data ini!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonText: 'Iya, hapus!',
-                cancelButtonText: 'Tidak, kembali',
-                confirmButtonClass: 'btn btn-success',
-                cancelButtonClass: 'btn btn-danger',
-            }).then((result) => {
-                if (result.value) {
+            $.SmartMessageBox({
+                title : "Hapus Data!",
+                content : "Data tidak akan kembali jika sudah dihapus",
+                buttons : '[Batal][Hapus]'
+            }, function(ButtonPressed) {
+                if (ButtonPressed === "Hapus") {
                     $.ajax({
-                        url: 'customer/delete'+'/'+ id,
-                        type: 'GET',
-                        success: function(data){
-                            new Noty({
-                                theme: ' alert alert-success alert-styled-left p-0',
-                                text: data.success,
-                                type: 'success',
-                                progressBar: false,
-                                timeout: 2000,
-                                closeWith: ['button']
-                            }).show();
-                            table.ajax.reload()
+	                    type: 'DELETE',
+                        url: '{{ route('customer.store') }}'+'/'+id,
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
                         },
-                        error: function(data){
-                            console.log('Error', data);
-                        }
+                        success: function(data){
+                            table.draw();
+	                        $.smallBox({
+                                title : "Berhasil",
+                                content : data.success,
+                                color : "#659265",
+                                iconSmall : "fa fa-check fa-2x fadeInRight animated",
+                                timeout : 3000
+                            });
+	                    },
                     })
-                } else {
-                    new Noty({
-                        theme: ' alert alert-info alert-styled-left p-0',
-                        text: 'Data tersimpan.',
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
                 }
-            })
+                if (ButtonPressed === "Batal") {
+                    $.smallBox({
+                        title : "Batal!",
+                        content : "<i class='fa fa-clock-o'></i> <i>Data tersimpan</i>",
+                        color : "#3276B1",
+                        iconSmall : "fa fa-warning fa-2x fadeInRight animated",
+                        timeout : 3000
+                    });
+                }
+            });
         });
     });
 </script>

@@ -21,8 +21,8 @@ class FinanceController extends Controller
             return DataTables::of($finance)
             ->addIndexColumn()
             ->addColumn('action', function($row){
-                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm edit"><i class="icon-pencil7"></i></a>';
-                $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="icon-bin"></i></a>';
+                $edit = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="btn btn-warning btn-sm edit"><i class="fa fa-edit"></i></a>';
+                $btn =  $edit.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
                 return $btn;
             })
             ->rawColumns(['action'])
@@ -30,7 +30,7 @@ class FinanceController extends Controller
                 return 'Rp. ' . number_format($item->balance, 0) . '';
             })
             ->editColumn('created_at', function($item) {
-                return '' . $item->created_at->format('d, M Y H:i') . '';
+                return '' . $item->created_at->format('d, M Y - H:i') . '';
             })
             ->make(true);
         }
@@ -66,7 +66,7 @@ class FinanceController extends Controller
         ]);
         if ($finance) {
             return response()->json([
-                'success'  => 'Data berhasil disimpan!'], 200);
+                'success'  => '<i class="fa fa-clock-o"></i> Data berhasil disimpan!'], 200);
         } else {
             return response()->json([
                 'error'    => 'Simpan gagal!'], 500);
@@ -95,7 +95,7 @@ class FinanceController extends Controller
     {
         $finance = Finance::find($id)->delete();
         if ($finance) {
-            return response()->json(['success' => 'Data berhasil dihapus!'], 200);
+            return response()->json(['success' => '<i class="fa fa-clock-o"></i> Data berhasil dihapus!'], 200);
         }
         return response()->json(['error' => 'Hapus gagal!'], 500);
     }

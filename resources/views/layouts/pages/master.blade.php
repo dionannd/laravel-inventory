@@ -64,7 +64,7 @@
 		<div id="shortcut">
 			<ul>
 				<li>
-					<a href="{{ route('finance.index') }}" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-money fa-4x"></i> <span>Keuangan </span> </span> </a>
+					<a href="{{ route('finance.index') }}" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-money fa-4x"></i> <span>Akun Saldo </span> </span> </a>
 				</li>
 				{{-- <li>
 					<a href="calendar.html" class="jarvismetro-tile big-cubes bg-color-orangeDark"> <span class="iconbox"> <i class="fa fa-calendar fa-4x"></i> <span>Calendar</span> </span> </a>

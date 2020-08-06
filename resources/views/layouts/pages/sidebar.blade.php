@@ -46,6 +46,9 @@
                 <a href="#"><i class="fa fa-lg fa-fw fa-usd"></i> <span class="menu-item-parent">Master Keuangan</span></a>
                 <ul>
                     <li>
+                        <a href="{{ route('income.index') }}">Pemasukan</a>
+                    </li>
+                    <li>
                         <a href="{{ route('cashout.index') }}">Pengeluaran</a>
                     </li>
                     <li>

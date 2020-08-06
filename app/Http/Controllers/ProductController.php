@@ -23,7 +23,7 @@ class ProductController extends Controller
         $category = Category::all();
         $place    = Place::all();
         if ($request->ajax()) {
-            $product = Product::with('category', 'place');
+            $product = Product::with('category', 'place')->get();
             return DataTables::of($product)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
