@@ -1,0 +1,37 @@
+<?php 
+
+/**
+ * Set any link as active by adding active class.
+ * @param [url] $uri  Current URI.
+ * @param string $output CSS class name.
+ */
+
+function set_active($uri, $output = 'active')
+{
+	if ( is_array($uri) ) {
+		foreach ($uri as $u) {
+			if (Route::is($u)) {
+				return $output;
+			}
+		}
+	} else {
+		if (Route::is($uri)) {
+			return $output;
+		}
+	}
+}
+
+function set_open($uri, $output = 'nav-item-expanded nav-item-open')
+{
+	if ( is_array($uri) ) {
+		foreach ($uri as $u) {
+			if (Route::is($u)) {
+				return $output;
+			}
+		}
+	} else {
+		if (Route::is($uri)) {
+			return $output;
+		}
+	}
+}
