@@ -2,6 +2,9 @@
 Make your inventory with application
 
 # Installation
-- copy .env.exmaple to .env
+- Copy .env.exmaple to .env
+- Change Database in file .env to your Database
+- open terminal and write :
 - composer install
 - php artisan key:generate
+- php artisan migrate
