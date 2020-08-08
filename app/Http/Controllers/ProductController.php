@@ -22,17 +22,24 @@ class ProductController extends Controller
     {
         $category = Category::all();
         $place    = Place::all();
+        $product  = Product::where('id')->get();
         if ($request->ajax()) {
-            $product = Product::with('category', 'place')->get();
+            $product = Product::with('category', 'place')->latest()->get();
             return DataTables::of($product)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
-                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm edit"><i class="fa fa-edit"></i></a>';
-                $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
-                return $btn;
+                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="btn btn-warning btn-sm edit"><i class="fa fa-edit"></i></a>';
+                $del = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
+                $show = $btn.' '.$del.' <a href="javascript:void(0)" class="btn btn-default btn-sm detail" rel="tooltip"
+                                            data-placement="bottom"
+                                            data-original-title="Detail" 
+                                            data-id="'.$row->id.'">
+                                                <i class="fa fa-search"></i>
+                                        </a>';
+                return $show;
             })
-            ->addColumn('name', function($row) {
-                $name =  '' .$row->name. ' ';
+            ->editColumn('name', function($row) {
+                $name =  '<strong>' .$row->name. '</strong> ';
                 $code = '<span class="label label-info ml-auto">' .$row->code. '</span> '.$name;
                 return $code;
             })
@@ -42,7 +49,7 @@ class ProductController extends Controller
             ->rawColumns(['action', 'name'])
             ->make(true);
         }
-        return view('backend.product', compact('category', 'place'));
+        return view('backend.product', compact('category', 'place', 'product'));
     }
 
     /**
@@ -65,13 +72,14 @@ class ProductController extends Controller
             'place_id'    => 'required',
             'qty'         => 'required',
             'purchase_qty'=> 'required',
+            'sales_qty'   => 'required',
             'loss_qty'    => 'required',
             'price'       => 'required',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png'
         ];
         $validation = Validator::make($input, $rule);
         if ($validation->fails()) {
-            return response()->json(['error' => 'Kesalahan saat mengisi fom!'], 422);
+            return response()->json(['error' => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'], 422);
         }
         $image = $request->image;
         if ($request->hasFile('image')) {
@@ -87,12 +95,16 @@ class ProductController extends Controller
             'place_id'    => $request->place_id,
             'qty'         => $request->qty,
             'purchase_qty'=> $request->purchase_qty,
+            'sales_qty'   => $request->sales_qty,
             'loss_qty'    => $request->loss_qty,
             'price'       => $request->price,
             'image'       => $image
         ]);
         if ($product) {
-            return response()->json(['success' => '<i class="fa fa-clock-o"></i> Data berhasil disimpan!'], 200);
+            return response()->json([
+                'success'   => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>,
+                                <i>Barang: <strong>'.$request->name.'</strong> telah ditambahkan.</i>'
+            ], 200);
         } else {
             return response()->json(['error' => '<i class="fa fa-clock-o"></i> Simpan gagal!'], 500);
         }
@@ -123,7 +135,9 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = Product::findOrFail($id);
+
+        return response()->json($product);
     }
 
     /**
@@ -148,7 +162,7 @@ class ProductController extends Controller
     {
         $product = Product::find($id)->delete();
         if ($product) {
-            return response()->json(['success' => '<i class="fa fa-clock-o"></i> Data berhasil dihapus!'], 200);
+            return response()->json(['success' => '<i class="fa fa-clock-o"></i> <i>Data berhasil dihapus!</i>'], 200);
         }
         return response()->json(['error' => 'Hapus gagal!'], 500);
     }

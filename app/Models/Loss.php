@@ -10,11 +10,11 @@ class Loss extends Model
 
     public function purchase()
     {
-    	return $this->belongsTo(Purchase::class, 'product_id', 'id');
+    	return $this->belongsTo(Purchase::class, 'invoice', 'id');
     }
 
     public function product()
     {
-    	return $this->belongsTo(Product::class, 'product_id', 'id');
+    	return $this->belongsTo(Product::class, 'qty', 'id');
     }
 }

@@ -21,7 +21,7 @@ class PlaceController extends Controller
             return DataTables::of($place)
             ->addIndexColumn()
             ->addColumn('action', function($row){
-                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm edit"><i class="fa fa-edit"></i></a>';
+                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="btn btn-warning btn-sm edit"><i class="fa fa-edit"></i></a>';
                 $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
                 return $btn;
             })
@@ -46,14 +46,15 @@ class PlaceController extends Controller
         ];
         $validation = Validator::make($input, $rule);
         if($validation->fails()) {
-            return response()->json(['error'    => '<i class="fa fa-clock-o"></i> Tolong isi semua form yang ada!'], 422);
+            return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'], 422);
         }
         $place = Place::updateOrCreate(['id'    => $request->id],[
             'name'  => $request->name,
             'desc'  => $request->desc
         ]);
         return response()->json([
-            'success'   => '<i class="fa fa-clock-o"></i> <i> Data berhasil disimpan!',
+            'success'   => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>,
+                            <i>Tempat Barang: <strong>'.$request->name.'</strong> telah ditambahkan.</i>',
             'data'      => $place
         ], 200);
     }
@@ -78,7 +79,8 @@ class PlaceController extends Controller
      */
     public function destroy($id)
     {
-        $place = Place::find($id)->delete();
-        return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i> Data berhasil dihapus!'], 200);
+        $place = Place::find($id);
+        $place->delete();
+        return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Tempat Barang: <strong>'.$place->name.'</strong> berhasil dihapus!'], 200);
     }
 }

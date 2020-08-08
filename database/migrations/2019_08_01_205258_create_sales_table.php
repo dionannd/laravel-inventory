@@ -24,6 +24,7 @@ class CreateSalesTable extends Migration
             $table->integer('price');
             $table->integer('cost')->nullable();
             $table->integer('total');
+            $table->enum('status', ['pending','approve'])->default('pending');
             $table->timestamps();
         });
     }

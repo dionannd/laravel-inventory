@@ -23,49 +23,44 @@ class PurchaseController extends Controller
     {
         $supplier   = Supplier::all();
         $product    = Product::all();
-        $last_no    = Purchase::max('id')+rand();
+        $last_no    = rand();
         $invoice = 'ORD/'.date('ym').$last_no;
         $filter     = Finance::where('category', '=' ,'Pembelian')->get();
         if ($request->ajax()) {
-            $purchase = Purchase::with('product', 'supplier', 'finance');
+            $purchase = Purchase::orderByRaw("FIELD(status, \"pending\", \"approve\")")->with('product', 'supplier', 'finance')->get();
             return DataTables::of($purchase)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
                 if ($row->status == 'pending') {
-                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Approve" class="edit btn btn-info btn-sm approve"><i class="icon-forward"></i></a>';
-                    $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="icon-bin"></i></a>';
+                    $approve = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Approve" class="btn btn-warning btn-sm approve"><i class="fa fa-clock-o"></i></a>';
+                    $delete = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
+                    $btn = $approve.' '.$delete.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
                     return $btn;
                 } else {
-                    $btn = '<a href="' . route('purchase.show', ['id' => $row->id]) . '" class="dropdown-item"><i class="icon-file-eye"></i></a>';
+                    $invo = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Show Invoice" class="btn btn-default btn-sm invoice"><i class="fa fa-file-archive-o"></i></a>';
+                    $btn = $invo. ' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
                     return $btn;
                 }
             })
             ->editColumn('status', function($row){
                 if ($row->status == 'approve'){
-                    $approve = ' <span class="badge badge-success">' .$row->status. '</span>';
-                    return $approve;
+                    return '<span class="label label-success">'.ucfirst($row->status).'</span>';
                 } else {
-                    $pending = ' <span class="badge badge-danger">' .$row->status. '</span>';
-                    return $pending;
+                    return '<span class="label label-danger">'.ucfirst($row->status).'</span>';
                 }
             })
-            ->editColumn('price', function($item) {
-                return 'Rp. ' . number_format($item->price, 0) . '';
+            ->editColumn('product', function($row){
+                $product = '<strong>'.$row->product->name.'</strong>';
+                return $product;
             })
-            ->editColumn('subtotal', function($item) {
-                return 'Rp. ' . number_format($item->subtotal, 0) . '';
-            })
-            ->editColumn('cost', function($item) {
-                return 'Rp. ' . number_format($item->cost, 0) . '';
-            })
-            ->editColumn('total', function($item) {
-                return 'Rp. ' . number_format($item->total, 0) . '';
+            ->editColumn('created_at', function($row){
+                return ''.$row->created_at->format('D, d-m-Y').'';
             })
             ->rawColumns(['action'])
             ->escapeColumns([])
             ->make(true);
         }
-        return view('backend.purchase', compact('invoice', 'supplier', 'product', 'filter', 'purchase'));
+        return view('backend.purchase', compact('invoice', 'supplier', 'product', 'filter'));
     }
 
     /**
@@ -89,11 +84,9 @@ class PurchaseController extends Controller
         ];
         $validator = Validator::make($request->all(), $rule);
         if ($validator->fails()) {
-            return response()->json(['error'        => 'Kesalahan saat mengisi form!'], 422);
+            return response()->json(['error'        => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'], 422);
         }
-        $purchase = Purchase::updateOrCreate([
-            'id'            => $request->id
-        ],[
+        $purchase = Purchase::updateOrCreate(['id' => $request->id],[
             'invoice'       => $request->invoice,
             'supplier_id'   => $request->supplier_id,
             'finance_id'    => $request->finance_id,
@@ -109,9 +102,9 @@ class PurchaseController extends Controller
         if ($purchase){
             if ($finance->balance <= $request->total) {
                 $purchase->delete();
-                return response()->json(['error'    => 'Pembayaran tidak cukup!'], 500);
+                return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Pembayaran tidak cukup, Saldo anda kurang!</i>'], 500);
             } else {
-                return response()->json(['success'  => 'Data berhasil disimpan!'], 200);
+                return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>'], 200);
             }
         } else {
             return response()->json(['error'        => 'Simpan gagal!'], 500);
@@ -120,19 +113,24 @@ class PurchaseController extends Controller
 
     public function approve($id)
     {
-        $purchase = Purchase::findOrFail($id);
-        $purchase->update(['status' => 'approve']);
-        if ($purchase->status == 'approve') {
-            $product = Product::select('qty')->where('id', $id)->get();
-            $finance = Finance::select('balance')->where('id', $id)->get();
-            $qty     = $product->qty + $purchase->qty;
-            $balance = $finance->balance - $purchase->total;
-            $product->update(['qty' => $qty]);
-            $product->update(['purchase_qty' => $qty]);
-            $finance->update(['balance' => $balance]);
-            return redirect()->back();
+        $purchase = Purchase::find($id);
+        if ($purchase) {
+            $qty     = $purchase->product->qty + $purchase->qty;
+            $balance = $purchase->finance->balance - $purchase->total;
+            $purchase->update([
+                'status' => 'approve'
+            ]);
+            $purchase->product->update([
+                'qty' => $qty,
+                'purchase_qty' => $qty
+            ]);
+            $purchase->finance->update([
+                'balance' => $balance
+            ]);
+            return response()->json(['success' => '<i class="fa fa-clock-o"></i> <i>Aprrove berhasil!</i>']);
         }
-        return response()->json(['error' => $purchase]);
+        $purchase->update(['status' => 'pending']);
+        return response()->json(['error' => 'Gagal Approve!']);
     }
 
     /**
@@ -141,14 +139,14 @@ class PurchaseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function show($id)
-    // {
-    //     $product    = Product::where('id', $id)->first();
-    //     $finance    = Finance::where('id', $id)->first();
-    //     $supplier   = Supplier::all();
-    //     $invoice    = Purchase::with('supplier', 'product','finance')->where('id', $id)->first();
-    //     return view('frontend.purchase_invoice', compact('invoice', 'product', 'finance', 'supplier' ));
-    // }
+    public function show($id)
+    {
+        $product    = Product::where('id', $id)->first();
+        $finance    = Finance::where('id', $id)->first();
+        $supplier   = Supplier::all();
+        $invoice    = Purchase::with('supplier', 'product','finance')->where('id', $id)->first();
+        return view('frontend.purchase_invoice', compact('invoice', 'product', 'finance', 'supplier' ));
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -172,65 +170,10 @@ class PurchaseController extends Controller
     {
         $purchase = Purchase::find($id)->delete();
         if ($purchase) {
-            return response()->json(['success'  => 'Data berhasil dihapus!'], 200);
+            return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Data berhasil dihapus!</i>'], 200);
         } else {
-            return response()->json(['error'    => 'Hapus gagal!'], 500);
+            return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Hapus gagal!</i>'], 500);
         }
-    }
-
-    public function data(Request $request)
-    {
-        $purchase = Purchase::with('supplier', 'product', 'finance');
-        return DataTables::of($purchase)
-        ->addIndexColumn()
-        ->addColumn('action', function ($item) {
-            if ($item->status == 'approve'){
-                return '<div class="list-icons list-icons-extended">
-                            <div class="list-icons-item dropdown">
-                                <a href="#" class="list-icons-item" data-toggle="dropdown">
-                                    <i class="icon-menu9"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="' . route('purchase.show', ['id' => $item->id]) . '" class="dropdown-item"><i class="icon-file-eye"></i> Invoice</a>
-                                    <a href="#" class="dropdown-item delete" data-id="'.$item->id.'"><i class="icon-bin"></i> Hapus</a>
-                                </div>
-                            </div>
-                        </div>';
-            } else {
-                return '<div class="list-icons">
-                            <div class="dropdown">
-                                <a href="#" class="list-icons-item" data-toggle="dropdown">
-                                    <i class="icon-menu9"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="#" class="dropdown-item approve" data-id="'.$item->id.'"><i class="icon-forward"></i> Approve</a>
-                                    <a href="#" class="dropdown-item delete" data-id="'.$item->id.'"><i class="icon-bin"></i> Hapus</a>
-                                </div>
-                            </div>
-                        </div>';
-            }
-        })
-        ->editColumn('status', function($item){
-            if($item->status == 'approve'){
-                return '<label class="badge badge-success">'.$item->status.'</label>';
-            } else {
-                return '<label class="badge badge-danger">'.$item->status.'</label>';
-            }
-        })
-        ->editColumn('price', function($item) {
-            return 'Rp. ' . number_format($item->price, 0) . '';
-        })
-        ->editColumn('subtotal', function($item) {
-            return 'Rp. ' . number_format($item->subtotal, 0) . '';
-        })
-        ->editColumn('cost', function($item) {
-            return 'Rp. ' . number_format($item->cost, 0) . '';
-        })
-        ->editColumn('total', function($item) {
-            return 'Rp. ' . number_format($item->total, 0) . '';
-        })
-        ->escapeColumns([])
-        ->make(true);
     }
 
     public function export_pdf($id)

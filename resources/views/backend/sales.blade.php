@@ -1,269 +1,392 @@
 @extends('layouts.pages.master')
 
-@section('title', 'Penjualan Produk')
+@section('title', 'Penjualan Barang')
 
 @section('content')
-<!-- Page header -->
-<div class="page-header page-header-light">
-    <div class="page-header-content header-elements-md-inline">
-        <div class="page-title d-flex">
-            <h4><i class="icon-circle-left2 mr-2"></i> <span class="font-weight-semibold">Penjualan Produk</span></h4>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
-    <div class="breadcrumb-line breadcrumb-line-light header-elements-md-inline">
-        <div class="d-flex">
-            <div class="breadcrumb">
-                <a href="{{ route('home') }}" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
-                <span class="breadcrumb-item active">Penjualan</span>
-            </div>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
+<!-- HEADER -->
+<div id="ribbon">
+    <span class="ribbon-button-alignment"> 
+        <span id="refresh" class="btn btn-ribbon" data-action="resetWidgets" data-title="refresh"  rel="tooltip" data-placement="bottom" data-original-title="<i class='text-warning fa fa-warning'></i> Warning! This will reset all your widget settings." data-html="true">
+            <i class="fa fa-refresh"></i>
+        </span> 
+    </span>
+    <ol class="breadcrumb">
+        <li>Home</li><li>Master Transaksi</li><li>Penjualan Barang</li>
+    </ol>
 </div>
-<!-- /page header -->
-<!-- Content area -->
-<div class="content">
-    <div class="card">
-        <div class="card-header header-elements-inline">
-            <h5 class="card-title">Data Penjualan</h5>
-            <button id="btn-add" name="btn-add" class="btn btn-alt-secondary">Tambah <i class="icon-file-plus2"></i></button>
+<!-- END HEADER -->			
+
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-truck fa-fw "></i> 
+                    Master Transaksi
+                <span>>  
+                    Penjualan Barang
+                </span>
+            </h1>
         </div>
-        <table class="table table-bordered table-striped table-hover datatable-colvis-state" id="table">
-            <thead>
-                <tr>
-                    <th>No Invoice</th>
-                    <th>Pelanggan</th>
-                    <th>Pemasukan</th>
-                    <th>Produk</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
-                    <th>Biaya</th>
-                    <th>Total</th>
-                    <th style="width:10px;">#</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+            <ul id="sparks" class="">
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-success btn-flat"><i class="fa fa-file-excel-o"></i> Import / Export</a>
+                </li>
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-primary btn-flat" id="create"><i class="fa fa-plus"></i> Tambah Penjualan</a>
+                </li>
+            </ul>
+        </div>
     </div>
+    <section id="widget-grid" class="">
+        <div class="row">
+            <article class="col-xs-12 xol-sm-12 col-md-12 col-lg-12">
+                <table id="table" class="table table-striped table-bordered table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-hide="phone" width="30px">NO</th>
+                            <th data-class="expand">INVOICE</th>
+                            <th data-hide="phone,tablet">PELANGGAN</th>
+                            <th data-hide="phone,tablet">BARANG</th>
+                            <th data-hide="phone,tablet" width="80px">QTY</th>
+                            <th data-hide="phone,tablet">TGL PENJUALAN</th>
+                            <th data-hide="phone,tablet" width="50px">STATUS</th>
+                            <th width="110px" class="text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                </table>
+            </article>
+        </div>
+    </section>
 </div>
 <!-- /Content area -->
-<!-- modal -->
-<div id="modal" class="modal fade" data-backdrop="false">
-    <div class="modal-dialog">
+
+<!-- Modal -->
+<div class="modal fade" id="modal" data-backdrop="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal_header"></h5>
+                <h4 class="modal-title" id="modal-header"></h4>
             </div>
-            <form id="form" name="form" class="form-horizontal">
-                @csrf
-                <input type="hidden" name="id" id="id" value="">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Nomor Invoice</label>
-                        <input type="text" id="invoice" name="invoice" class="form-control" value="{{$invoice}}" readonly>
+            <div class="modal-body">
+                <form id="form" name="form">
+                    @csrf
+                    <input type="hidden" name="id" id="id" value="">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="invoice">Invoice:<span class="text-danger">*</span></label>
+                                <input type="text" id="invoice" name="invoice" class="form-control" value="" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="product_id">Nama Barang:<span class="text-danger">*</span></label>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="input-group">
+                                            <select name="product_id" id="product_id" style="width: 100%" class="select2">
+                                                <option value="">Pilih Barang</option>
+                                                <optgroup label="Barang">
+                                                    @foreach ($product as $row)
+                                                    <option value="{{$row->id}}">{{$row->name}}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            </select>
+                                            <div class="input-group-btn">
+                                                <a href="{{ route('product.index') }}" class="btn btn-info"><i class="fa fa-plus"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="product_qty">Stok:</label>
+                                <input type="text" id="product_qty" class="form-control" readonly>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Nama Pelanggan</label>
-                        <select name="customer_id" id="customer_id" class="form-control select-search" data-fouc>
-                            <option value="">Pilih</option>
-                            <optgroup label="Pilih Pelanggan">
-                                @foreach ($customer as $item)
-                                <option value="{{$item->id}}">{{$item->name}}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                        <a href="{{ route('customer.index') }}">Tambah pelanggan</a>
+                        <label for="customer_id">Nama Pelanggan:<span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <select name="customer_id" id="customer_id" style="width: 100%" class="select2">
+                                        <optgroup label="Supplier">
+                                            @foreach ($customer as $row)
+                                            <option value="{{$row->id}}">{{$row->name}}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    </select>
+                                    <div class="input-group-btn">
+                                        <a href="{{ route('customer.index') }}" class="btn btn-info"><i class="fa fa-plus"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Pemasukan</label>
-                        <select name="finance_id" id="finance_id" class="form-control select-search" data-fouc>
-                            <option value="">Pilih</option>
-                            <optgroup label="Pilih Pemasukan">
-                                @foreach ($finance as $item)
-                                <option value="{{$item->id}}">{{$item->name}}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="finance_id">Akun Pemasukan:<span class="text-danger">*</span></label>
+                                <select name="finance_id" id="finance_id" class="select2" data-fouc>
+                                    <optgroup label="Pilih Pembayaran">
+                                        @foreach ($finance as $row)
+                                        <option value="{{$row->id}}">{{$row->name}}</option>
+                                        @endforeach
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="qty">Qty:<span class="text-danger">*</span></label>
+                                <input type="number" id="qty" name="qty" value="" class="form-control">
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Nama Barang</label>
-                        <select name="product_id" id="product_id" class="form-control select-search" data-fouc>
-                            <option value="">Pilih</option>
-                            <optgroup label="Pilih Barang">
-                                @foreach ($product as $item)
-                                <option value="{{$item->id}}">{{$item->name}}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                        <a href="{{route('product.index')}}">Tambah produk</a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Deskripsi:</label>
+                                <textarea name="desc" id="desc" cols="3" rows="3" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="price">Harga:<span class="text-danger">*</span></label>
+                                <input type="number" id="price" name="price" placeholder="Pilih Barang" class="form-control" readonly>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Qty</label>
-                        <input type="number" id="qty" name="qty" value="" class="form-control">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="cost">Biaya Kirim:</label>
+                                <input type="number" id="cost" name="cost" value="0" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="total">Total:<span class="text-danger">*</span></label>
+                                <input type="number" id="total" name="total" value="0" class="form-control" readonly>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Harga</label>
-                        <input type="number" id="price" name="price" placeholder="Pilih Barang" class="form-control" readonly>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary" id="save" value="create">Simpan</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Deskripsi</label>
-                        <textarea name="desc" id="desc" cols="3" rows="3" class="form-control"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Biaya Kirim</label>
-                        <input type="number" id="cost" name="cost" value="" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Total</label>
-                        <input type="number" id="total" name="total" value="0" class="form-control" readonly>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn bg-primary submit" id="btn-save" value="add">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- /modal -->
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- END CONTENT -->
 @endsection
 
 @push('scripts')
 <script>
     $(document).ready(function(){
-        // DataTable
+        
+        // Function DataTable
+        var responsiveTable = undefined;
+        var breakpointDefinition = {
+            tablet : 1024,
+            phone : 480
+        };
         var table = $('#table').DataTable({
             destroy: true,
             serverSide: true,
-            ajax: '{{route('sales.data')}}',
+            ajax: '{{route('sales.index')}}',
             columns: [
-                {data: "invoice"},
-                {data: "customer.name"},
-                {data: "finance.name"},
-                {data: "product.name"},
-                {data: "qty"},
-                {data: "price"},
-                {data: "cost"},
-                {data: "total"},
-                {data: "action"}
-            ]
+                {data: 'DT_RowIndex'},
+                {data: 'invoice'},
+                {data: 'customer.name'},
+                {data: 'product'},
+                {data: 'qty'},
+                {data: 'created_at'},
+                {data: 'status'},
+                {data: 'action'},
+            ],
+            sDom: "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-12 hidden-xs'l>r>"+
+                "t"+
+                "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-xs-12 col-sm-6'p>>",
+            
+            preDrawCallback : function() {
+                if (!responsiveTable) {
+                    responsiveTable = new ResponsiveDatatablesHelper($('#table'), breakpointDefinition);
+                }
+            },
+            rowCallback : function(nRow) {
+                responsiveTable.createExpandIcon(nRow);
+            },
+            drawCallback : function(oSettings) {
+                responsiveTable.respond();
+            }
         });
-        // Add Modal
-        $('#btn-add').click(function(){
+
+        // Function Click Create
+        $('#create').click(function(){
+            $('#save').val('create');
+            $('#id').val('');
             $('#form').trigger('reset');
-            $('#modal_header').html("Tambah Penjualan");
+            $('#modal-header').html('<i class="fa fa-cart"></i> Tambah Penjualan');
             $('#modal').modal('show');
+            $('#invoice').val('{{ $invoice }}');
+            $('#product_qty').val(0);
         });
-        // Close Modal
-        $('#modal').on('hidden.bs.modal', function(){
-            $(this).find('form')[0].reset();
-            $('#error-no').html('');
-            $('#error-supplier').html('');
-            $('#error-product').html('');
-            $('#error-qty').html('');
-            $('#error-price').html('');
-            $('#error-subtotal').html('');
-            $('#error-cost').html('');
-            $('#error-total').html('');
-        });
+
         // Function Add or Edit
-        $('#btn-save').on('click', function(){
-            var form = $('#form').serialize();
+        $('#save').on('click', function(e){
+            e.preventDefault();
+            $(this).html('Menyimpan...');
             $.ajax({
+                data: $('#form').serialize(),
                 url: '{{route('sales.store')}}',
-                data: form,
-                method: 'post',
-                dataType: 'json',
-                beforeSend: function() {
-                    $('.submit').html('Tunggu sebentar...');
-                },
-                success: function(response){
-                    $('.submit').html('Simpan');
+                type: 'POST',
+                dataType: 'JSON',
+                success: function(data) {
+                    $('#save').html('Simpan');
                     $('#form').trigger('reset');
-                    $('#modal').modal('toggle');
-                    swal({
-                        title: 'Berhasil!',
-                        text: response.success,
-                        type: 'success',
-                        buttonsStyling: false,
-                        confirmButtonClass: 'btn btn-primary'
+                    $('#modal').modal('hide');
+                    table.draw();
+					$.bigBox({
+                        title : "<i>Berhasil!</i>",
+                        content : data.success,
+                        color : "#739E73",
+                        timeout: 4000,
+                        icon : "fa fa-check",
                     });
-                    table.ajax.reload()
                 },
-                error: function(response){
-                    $('.submit').html('Simpan');
-                    new Noty({
-                        theme: ' alert alert-warning alert-styled-left p-0',
-                        text: response.responseJSON.error,
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
+                error: function(data){
+                    $('#save').html('Simpan');
+					$.smallBox({
+                        title : "<i>Error!</i>",
+                        content : data.responseJSON.error,
+                        color : "#C46A69",
+                        iconSmall : "fa fa-exclamation-circle bounce animated",
+                        timeout : 4000
+                    });
                 }
             });
         });
-        // Delete
-        $('body').on('click', '.delete', function(){
+
+        // Function Aprrove
+        $('body').on('click', '.approve', function(e){
+            e.preventDefault();
             var id = $(this).data('id');
-            swal({
-                title: "Apa kau yakin?",
-                text: "Ingin menghapus data ini!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonText: 'Iya, hapus!',
-                cancelButtonText: 'Tidak, kembali',
-                confirmButtonClass: 'btn btn-success',
-                cancelButtonClass: 'btn btn-danger',
-            }).then((result) => {
-                if (result.value) {
+            $.SmartMessageBox({
+                title : "Approve Data!",
+                content : "Data akan diupdate & status akan berubah approve",
+                buttons : '[Batal][Approve]'
+            }, function(ButtonPressed) {
+                if (ButtonPressed === "Approve") {
                     $.ajax({
-                        url: 'sales/delete'+'/'+ id,
-                        type: "GET",
-                        success: function(response){
-                            new Noty({
-                                theme: ' alert alert-success alert-styled-left p-0',
-                                text: response.success,
-                                type: 'success',
-                                progressBar: false,
-                                timeout: 2000,
-                                closeWith: ['button']
-                            }).show();
-                            table.ajax.reload()
+	                    type: 'GET',
+                        url: '{{ url('sales') }}'+'/'+id,
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
                         },
-                        error: function(response){
-                            swal("Error!", response.error, "danger");
+                        success: function(data){
+                            table.draw();
+	                        $.smallBox({
+                                title : "<i>Berhasil</i>",
+                                content : data.success,
+                                color : "#659265",
+                                iconSmall : "fa fa-check fa-2x fadeInRight animated",
+                                timeout : 3000
+                            });
+	                    },
+                        error: function(data){
+                            console.log('Error', data.responseJSON.error)
                         }
                     })
-                } else {
-                    new Noty({
-                        theme: ' alert alert-info alert-styled-left p-0',
-                        text: 'Data pembelian tersimpan.',
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
                 }
-            })
+                if (ButtonPressed === "Batal") {
+                    $.smallBox({
+                        title : "<i>Batal!</i>",
+                        content : "<i class='fa fa-clock-o'></i> <i>Approve dibatalkan</i>",
+                        color : "#3276B1",
+                        iconSmall : "fa fa-warning fa-2x fadeInRight animated",
+                        timeout : 3000
+                    });
+                }
+            });
         });
-        // Get price from product
+
+        // Function Delete
+        $('body').on('click', '.delete', function(){
+            var id = $(this).data('id');
+            $.SmartMessageBox({
+                title : "Hapus Data!",
+                content : "Data tidak akan kembali jika sudah dihapus",
+                buttons : '[Batal][Hapus]'
+            }, function(ButtonPressed) {
+                if (ButtonPressed === "Hapus") {
+                    $.ajax({
+	                    type: 'DELETE',
+                        url: '{{ route('sales.store') }}'+'/'+id,
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
+                        },
+                        success: function(data){
+                            table.draw();
+	                        $.smallBox({
+                                title : "<i>Berhasil</i>",
+                                content : data.success,
+                                color : "#659265",
+                                iconSmall : "fa fa-check fa-2x fadeInRight animated",
+                                timeout : 3000
+                            });
+	                    },
+                    })
+                }
+                if (ButtonPressed === "Batal") {
+                    $.smallBox({
+                        title : "<i>Batal!</i>",
+                        content : "<i class='fa fa-clock-o'></i> <i>Data tersimpan</i>",
+                        color : "#3276B1",
+                        iconSmall : "fa fa-warning fa-2x fadeInRight animated",
+                        timeout : 3000
+                    });
+                }
+            });
+        });
+
+        // Function Get price from product
         $('#product_id').on('change', function(){
             var id = $(this).find(':selected').val();
             $.ajax({
                 url: '{{ route('sales.price')}}',
                 type: 'POST',
-                data: {'id': id},
+                data: {
+                    'id': id,
+                    '_token': '{{ csrf_token() }}',
+                },
                 dataType: 'json',
                 success: function(response){
                     console.log(response);
                     $('#price').val(response.data.price);
+                    $('#product_qty').val(response.data.qty);
                     $('#total').val(response.data.price);
                 },
             });
         });
-        /*-------- SUB TOTAL PRICE ---------- */
+
+        // Function SubTotal
         var total = 0;
         $('#qty').on('keyup',function(){
             var price = $('#price').val();

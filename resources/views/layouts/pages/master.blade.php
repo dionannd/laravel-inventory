@@ -64,21 +64,21 @@
 		<div id="shortcut">
 			<ul>
 				<li>
-					<a href="{{ route('finance.index') }}" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-money fa-4x"></i> <span>Akun Saldo </span> </span> </a>
+					<a href="{{ route('finance.index') }}" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-money fa-4x"></i> <span>Akun Saldo <span class="label pull-right bg-color-blueLight">{{ App\Models\Finance::count() }}</span></span> </span> </a>
+				</li>
+				<li>
+					<a href="{{ route('product.index') }}" class="jarvismetro-tile big-cubes bg-color-orangeDark"> <span class="iconbox"> <i class="fa fa-cubes fa-4x"></i> <span>Tambah Barang</span> </span> </a>
+				</li>
+				<li>
+					<a href="{{ route('purchase.index') }}" class="jarvismetro-tile big-cubes bg-color-purple"> <span class="iconbox"> <i class="fa fa-truck fa-4x"></i> <span>Pembelian Barang</span> </span> </a>
+				</li>
+				<li>
+					<a href="{{ route('sales.index') }}" class="jarvismetro-tile big-cubes bg-color-blueDark"> <span class="iconbox"> <i class="fa fa-shopping-cart fa-4x"></i> <span>Penjualan Barang</span> </span> </a>
 				</li>
 				{{-- <li>
-					<a href="calendar.html" class="jarvismetro-tile big-cubes bg-color-orangeDark"> <span class="iconbox"> <i class="fa fa-calendar fa-4x"></i> <span>Calendar</span> </span> </a>
-				</li>
-				<li>
-					<a href="gmap-xml.html" class="jarvismetro-tile big-cubes bg-color-purple"> <span class="iconbox"> <i class="fa fa-map-marker fa-4x"></i> <span>Maps</span> </span> </a>
-				</li>
-				<li>
-					<a href="invoice.html" class="jarvismetro-tile big-cubes bg-color-blueDark"> <span class="iconbox"> <i class="fa fa-book fa-4x"></i> <span>Invoice <span class="label pull-right bg-color-darken">99</span></span> </span> </a>
-				</li>
-				<li>
 					<a href="gallery.html" class="jarvismetro-tile big-cubes bg-color-greenLight"> <span class="iconbox"> <i class="fa fa-picture-o fa-4x"></i> <span>Gallery </span> </span> </a>
-				</li>
-				<li>
+				</li> --}}
+				{{-- <li>
 					<a href="profile.html" class="jarvismetro-tile big-cubes selected bg-color-pinkDark"> <span class="iconbox"> <i class="fa fa-user fa-4x"></i> <span>My Profile </span> </span> </a>
 				</li> --}}
 			</ul>
@@ -120,9 +120,7 @@
 		<script src="{{ asset('assets/js/plugin/fastclick/fastclick.min.js') }}"></script>
 
         <!--[if IE 8]>
-
 		<h1>Your browser is out of date, please update your browser by going to www.microsoft.com/download</h1>
-
 		<![endif]-->
 
         <script src="{{ asset('assets/js/app.min.js') }}"></script>
@@ -136,14 +134,22 @@
 		<script src="{{ asset('assets/js/plugin/datatables/dataTables.bootstrap.min.js') }}"></script>
 		<script src="{{ asset('assets/js/plugin/datatable-responsive/datatables.responsive.min.js') }}"></script>
 
-		<script src="js/plugin/maxlength/bootstrap-maxlength.min.js"></script>
-		<script src="js/plugin/bootstrap-timepicker/bootstrap-timepicker.min.js"></script>
-		<script src="js/plugin/x-editable/moment.min.js"></script>
+		<script src="{{ asset('assets/js/plugin/maxlength/bootstrap-maxlength.min.js') }}"></script>
+		<script src="{{ asset('assets/js/plugin/bootstrap-timepicker/bootstrap-timepicker.min.js') }}"></script>
+		<script src="{{ asset('assets/js/plugin/x-editable/moment.min.js') }}"></script>
+		<script src="{{ asset('assets/js/plugin/bootstrapvalidator/bootstrapValidator.min.js') }}"></script>
+		<script src="{{ asset('assets/js/plugin/jquery-form/jquery-form.min.js') }}"></script>
 
 		<script type="text/javascript">
 
 			$(document).ready(function() {
+				
+				// Set Up Pages
 				pageSetUp();
+				
+				// Function Validate
+				$('#form').bootstrapValidator();
+
 			})
 		
 		</script>

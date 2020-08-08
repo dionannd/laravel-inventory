@@ -23,6 +23,7 @@ class CreateProductsTable extends Migration
             $table->string('image')->nullable();
             $table->integer('qty');
             $table->integer('purchase_qty');
+            $table->integer('sales_qty');
             $table->integer('loss_qty');
             $table->timestamps();
         });

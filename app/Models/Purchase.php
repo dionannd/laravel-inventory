@@ -22,4 +22,9 @@ class Purchase extends Model
     {
         return $this->belongsTo(Finance::class, 'finance_id', 'id');
     }
+
+    public function loss()
+    {
+        return $this->hasOne(Loss::class);
+    }
 }

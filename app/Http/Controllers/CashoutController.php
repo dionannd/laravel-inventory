@@ -23,15 +23,15 @@ class CashoutController extends Controller
             return DataTables::of($cashout)
             ->addIndexColumn()
             ->addColumn('action', function($row){
-                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="icon-bin"></i></a>';
+                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
                 return $btn;
             })
             ->rawColumns(['action'])
-            ->editColumn('created_at', function($item) {
-                return '' . $item->created_at->format('d, M Y') . '';
-            })
             ->editColumn('nominal', function($row) {
-                return 'Rp. ' . number_format($row->price, 0) . '';
+                return 'Rp. ' . number_format($row->nominal, 0) . '';
+            })
+            ->editColumn('created_at', function($item) {
+                return '' . $item->created_at->format('d M Y') . '';
             })
             ->make(true);
         }

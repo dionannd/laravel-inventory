@@ -22,8 +22,8 @@ class CreatePurchasesTable extends Migration
             $table->integer('qty');
             $table->integer('price');
             $table->integer('cost')->nullable();
-            $table->string('subtotal');
             $table->string('total');
+            $table->string('subtotal');
             $table->enum('status', ['pending','approve'])->default('pending');
             $table->timestamps();
         });

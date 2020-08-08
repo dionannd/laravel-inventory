@@ -21,17 +21,41 @@ class LossController extends Controller
         $product  = Product::all();
         $purchase = Purchase::all();
         if ($request->ajax()) {
-            $loss = Loss::with('product', 'purchase');
+            $loss = Loss::with('purchase', 'product');
             return DataTables::of($loss)
             ->addIndexColumn()
-            ->addColumn('action', function($row){
-                $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="icon-bin"></i></a>';
-                return $btn;
+            ->editColumn('status', function($row){
+                if ($row->status == 'checked'){
+                    return '<span class="label label-success">'.ucfirst($row->status).'</span>';
+                } else {
+                    return '<span class="label label-warning">'.ucfirst($row->status).'</span>';
+                }
             })
+            ->addColumn('action', function($row){
+                if ($row->status == 'checking') {
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Checking" class="btn btn-success btn-sm check"><i class="fa fa-clock-o"></i></a>';
+                    $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
+                    return $btn;
+                } else {
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
+                    $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
+                    return $btn;
+                }
+            })
+            ->editColumn('product', function($row) {
+                $product =  '<span class="label label-primary">'.$row->purchase->invoice.'</span> <strong>'.$row->product_id.'</strong>';
+                return $product;
+            })
+            ->editColumn('date', function($row) {
+                $input =  $row->date;
+                $date = strtotime($input);
+                return date('d-m-Y', $date);
+            })
+            ->escapeColumns([])
             ->rawColumns(['action'])
             ->make(true);
         }
-        return view('backend.loss', compact('product', 'purchase'));
+        return view('backend.loss', compact('purchase', 'product'));
     }
 
     /**
@@ -43,6 +67,7 @@ class LossController extends Controller
     public function store(Request $request)
     {
         $rule = [
+            'invoice'       => 'required',
             'product_id'    => 'required',
             'qty'           => 'required',
             'price'         => 'required',
@@ -52,11 +77,10 @@ class LossController extends Controller
         ];
         $validator = Validator::make($request->all(), $rule);
         if ($validator->fails()) {
-            return response()->json(['error'        => 'Kesalahan saat mengisi fom!'], 422);
+            return response()->json(['error'        => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'], 422);
         }
-        $loss = Loss::updateOrCreate([
-            'id'            => $request->id
-        ], [
+        $loss = Loss::updateOrCreate(['id' => $request->id], [
+            'invoice'       => $request->invoice,
             'product_id'    => $request->product_id,
             'qty'           => $request->qty,
             'price'         => $request->price,
@@ -64,15 +88,15 @@ class LossController extends Controller
             'total'         => $request->total,
             'desc'          => $request->desc
         ]);
-        $purchase = Purchase::where('id', $request->product_id)->first();
-        $product  = Product::where('id', $request->id)->first();
         if ($loss) {
-            if ($purchase->qty <= $request->qty) {
-                return response()->json(['error'    => 'Melebihi jumlah pembelian!'], 500);
+            if ($request->qty >= $loss->purchase->qty) {
+                $loss->delete();
+                return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Melebihi jumlah pembelian!</i>'], 500);
+            } elseif ($request->qty = '0') {
+                $loss->delete();
+                return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Silahkan isi jumlah barang!</i>'], 500);
             } else {
-                $qty = $product->qty - $request->qty;
-                $product->update(['qty' => $qty]);
-                return response()->json(['success'  => 'Data berhasil disimpan!'], 200);
+                return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>'], 200);
             }
         } else {
             return response()->json(['error'        => 'Data error'], 500);
@@ -107,44 +131,31 @@ class LossController extends Controller
         return response()->json(['error' => 'Hapus gagal!'], 500);
     }
 
-    public function data(Request $request)
+    public function checking($id)
     {
-        $loss = Loss::with('purchase', 'product');
-        return DataTables::of($loss)
-            ->addColumn('action', function ($item) {
-                return '<div class="list-icons">
-                            <div class="dropdown">
-                                <a href="#" class="list-icons-item" data-toggle="dropdown">
-                                    <i class="icon-menu9"></i>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="#" class="dropdown-item edit" data-id="' . $item->id . '"><i class="icon-pencil7"></i> Edit</a>
-                                    <a href="#" class="dropdown-item delete" data-id="' . $item->id . '"><i class="icon-bin"></i> Hapus</a>
-                                </div>
-                            </div>
-                        </div>';
-            })
-            // ->editColumn('id_product', function($item) {
-            //     return '' . $item->product->name_product . '';
-            // })
-            ->editColumn('price', function($item) {
-                return 'Rp. ' . number_format($item->price, 0) . '';
-            })
-            ->editColumn('total', function($item) {
-                return 'Rp. ' . number_format($item->total, 0) . '';
-            })
-            ->make(true);
+        $loss = Loss::where('id', $id)->first();
+        if ($loss) {
+            $qty      = $loss->product->qty - $loss->qty;
+            $loss_qty = $loss->product->loss_qty + $loss->qty;
+            $loss->update([
+                'status' => 'checked'
+            ]);
+            $loss->product->update([
+                'qty' => $qty,
+                'loss_qty' => $loss_qty
+            ]);
+            return response()->json(['success' => '<i class="fa fa-clock-o"></i> <i>Data berhasil dicek!</i>']);
+        }
+        return response()->json(['error' => 'Gagal Approve!']);
     }
 
     public function getData(Request $request)
     {
-        $purchase = Purchase::with('product')->where('id', $request->id)->first();
-        if ($purchase) {
-            // dd($purchase);
-            return response()->json(['success' => 'Data success', 'data' => $purchase], 200);
+        $data = Purchase::where('id', $request->id)->first();
+        if ($data) {
+            return response()->json(['success' => 'Data success', 'data' => $data], 200);
         } else {
-            return response()->json(['error' => 'Data failed', 'data' => $purchase], 404);
+            return response()->json(['error' => 'Data failed', 'data' => $data], 404);
         }
     }
 }

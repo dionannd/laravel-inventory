@@ -3,67 +3,79 @@
 @section('title', 'Pengeluaran')
 
 @section('content')
-<!-- Page header -->
-<div class="page-header page-header-light border-bottom-1 border-bottom-primary">
-    <div class="page-header-content header-elements-md-inline">
-        <div class="page-title d-flex">
-            <h4><i class="icon-circle-left2 mr-2"></i> <span class="font-weight-semibold">Pengeluaran</span></h4>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
-    <div class="breadcrumb-line breadcrumb-line-light header-elements-md-inline">
-        <div class="d-flex">
-            <div class="breadcrumb">
-                <a href="{{ route('home') }}" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
-                <span class="breadcrumb-item active">Pengeluaran</span>
-            </div>
-            <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
-        </div>
-    </div>
+<!-- HEADER -->
+<div id="ribbon">
+    <span class="ribbon-button-alignment"> 
+        <span id="refresh" class="btn btn-ribbon" data-action="resetWidgets" data-title="refresh"  rel="tooltip" data-placement="bottom" data-original-title="<i class='text-warning fa fa-warning'></i> Warning! This will reset all your widget settings." data-html="true">
+            <i class="fa fa-refresh"></i>
+        </span> 
+    </span>
+    <ol class="breadcrumb">
+        <li>Home</li><li>Master Keuangan</li><li>Pengeluaran</li>
+    </ol>
 </div>
-<!-- Content area -->
-<div class="content">
-    <div class="card">
-        <div class="card-header bg-primary text-white header-elements-inline">
-            <h6 class="card-title"><span class="font-weight-semibold">Data Pengeluaran</span></h6>
-            <a href="javascript:void(0)" class="btn btn-success" id="create">Tambah <i class="icon-file-plus2"></i></a>
+<!-- END HEADER -->			
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-users fa-fw "></i> 
+                    Master Keuangan
+                <span>>  
+                    Pengeluaran
+                </span>
+            </h1>
         </div>
-        <div class="card-body">
-            <table class="table table-hover" id="table">
-                <thead>
-                    <tr>
-                        <th width="50px" class="text-center">No</th>
-                        <th>Biaya</th>
-                        <th>Pembayaran</th>
-                        <th>Nominal</th>
-                        <th>Deskripsi</th>
-                        <th>Tgl Pengeluaran</th>
-                        <th width="50px" class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
+            <ul id="sparks" class="">
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-success btn-flat"><i class="fa fa-file-excel-o"></i> Import / Export</a>
+                </li>
+                <li class="sparks-info">
+                    <a href="javascript:void(0);" class="btn btn-primary btn-flat" id="create"><i class="fa fa-plus"></i> Tambah Pengeluaran</a>
+                </li>
+            </ul>
         </div>
     </div>
+    <section id="widget-grid" class="">
+        <div class="row">
+            <article class="col-xs-12 xol-sm-12 col-md-12 col-lg-12">
+                <table id="table" class="table table-striped table-bordered table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th width="30px">NO</th>
+                            <th>NAMA BIAYA</th>
+                            <th>AKUN PEMBAYARAN</th>
+                            <th>NOMINAL</th>
+                            <th>DESKRIPSI</th>
+                            <th>TANGGAL</th>
+                            <th width="30px" class="text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                </table>
+            </article>
+        </div>
+    </section>
 </div>
-<!-- modal -->
-<div id="modal" class="modal fade" data-backdrop="false" aria-hidden="true">
+<!-- Modal -->
+<div class="modal fade" id="modal" data-backdrop="false" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-success">
-                <h5 class="modal-title" id="modal-header"></h5>
+            <div class="modal-header">
+                <h4 class="modal-title" id="modal-header"></h4>
             </div>
-            <form id="form" name="form" class="form-horizontal">
-                @csrf
-                <input type="hidden" name="id" id="id">
-                <div class="modal-body">
+            <div class="modal-body">
+                <form id="form" name="form" class="form">
+                    @csrf
+                    <input type="hidden" name="id" id="id">
                     <div class="form-group">
-                        <label>Name Biaya</label>
+                        <label for="expense">Name Biaya</label>
                         <input type="text" id="expense" name="expense" placeholder="Masukan Nama Biaya" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Pembayaran</label>
-                        <select name="finance_id" id="finance_id" class="form-control select-search">
-                            <option value="">Pilih</option>
+                        <label for="finance_id">Pembayaran</label>
+                        <select name="finance_id" id="finance_id" class="select2">
                             <optgroup label="Pilih Pembayaran">
                                 @foreach ($finance as $item)
                                 <option value="{{$item->id}}">{{$item->name}}</option>
@@ -72,22 +84,30 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Deskripsi</label>
+                        <label for="desc">Deskripsi</label>
                         <textarea name="desc" id="desc" rows="3" cols="3" placeholder="Masukan Deskripsi Biaya" class="form-control"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Nominal</label>
+                        <label for="nominal">Nominal</label>
                         <input type="number" id="nominal" name="nominal" placeholder="Masukan Nominal Pengeluaran" class="form-control">
                     </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="save" value="create">Simpan <i class="fa fa-send"></i></button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn bg-primary" id="save" value="create">Simpan</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- END CONTENT -->
 @endsection
 
 @push('scripts')
@@ -96,6 +116,8 @@
         // DataTable
         var table = $('#table').DataTable({
             serverSide: true,
+            responsive: true,
+            autoWidth: true,
             ajax: '{{route('cashout.index')}}',
             columns: [
                 {data: "id",
@@ -103,11 +125,11 @@
                         return meta.row + meta.settings._iDisplayStart +1;
                     }
                 },
-                {data: 'expense', name: 'expense'},
-                {data: 'finance.name', name: 'finance.name'},
-                {data: 'nominal', name: 'nominal'},
-                {data: 'desc', name: 'desc'},
-                {data: 'created_at', name: 'created_at'},
+                {data: 'expense'},
+                {data: 'finance.name'},
+                {data: 'nominal'},
+                {data: 'desc'},
+                {data: 'created_at'},
                 {data: 'action', orderable: false, searchable: false}
             ]
         });
@@ -128,30 +150,29 @@
                 url: '{{route('cashout.store')}}',
                 type: 'POST',
                 dataType: 'JSON',
-                success: function(data){
-                    $('.submit').html('Simpan');
+                success: function(data) {
+                    $('#save').html('Simpan');
                     $('#form').trigger('reset');
-                    $('#modal').modal('toggle');
-                    table.ajax.reload();
-                    swal({
-                        title: 'Berhasil!',
-                        text: data.success,
-                        type: 'success',
-                        buttonsStyling: false,
-                        confirmButtonClass: 'btn btn-primary'
+                    $('#modal').modal('hide');
+                    table.draw();
+					$.bigBox({
+                        title : "Berhasil!",
+                        content : data.success,
+                        color : "#739E73",
+                        timeout: 4000,
+                        icon : "fa fa-check",
                     });
                 },
                 error: function(data){
                     console.log('Error', data);
                     $('#save').html('Simpan');
-                    new Noty({
-                        theme: ' alert alert-warning alert-styled-left p-0',
-                        text: data.responseJSON.error,
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
+					$.smallBox({
+                        title : "Error!",
+                        content : "<i class='fa fa-clock-o'></i>Tolong isi semua form yang ada.",
+                        color : "#C46A69",
+                        iconSmall : "fa fa-exclamation-circle bounce animated",
+                        timeout : 4000
+                    });
                 }
             });
         });
@@ -172,48 +193,42 @@
         // Function Delete
         $('body').on('click', '.delete', function(){
             var id = $(this).data('id');
-            swal({
-                title: "Apa kau yakin?",
-                text: "Ingin menghapus data ini!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonText: 'Iya, hapus!',
-                cancelButtonText: 'Tidak, kembali',
-                confirmButtonClass: 'btn btn-success',
-                cancelButtonClass: 'btn btn-danger',
-            }).then((result) => {
-                if (result.value) {
+            $.SmartMessageBox({
+                title : "Hapus Data!",
+                content : "Data tidak akan kembali jika sudah dihapus",
+                buttons : '[Batal][Hapus]'
+            }, function(ButtonPressed) {
+                if (ButtonPressed === "Hapus") {
                     $.ajax({
-                        url: 'cashout/delete'+'/'+ id,
-                        type: 'GET',
-                        success: function(response){
-                            new Noty({
-                                theme: ' alert alert-success alert-styled-left p-0',
-                                text: response.success,
-                                type: 'success',
-                                progressBar: false,
-                                timeout: 2000,
-                                closeWith: ['button']
-                            }).show();
-                            table.ajax.reload();
+	                    type: 'DELETE',
+                        url: '{{ route('cashout.store') }}'+'/'+id,
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
                         },
-                        error: function(response){
-                            swal("Error!", response.error, "danger");
-                        }
+                        success: function(data){
+                            table.draw();
+	                        $.smallBox({
+                                title : "Berhasil",
+                                content : data.success,
+                                color : "#659265",
+                                iconSmall : "fa fa-check fa-2x fadeInRight animated",
+                                timeout : 3000
+                            });
+	                    },
                     })
-                } else {
-                    new Noty({
-                        theme: ' alert alert-info alert-styled-left p-0',
-                        text: 'Data tersimpan.',
-                        type: 'error',
-                        progressBar: false,
-                        timeout: 2000,
-                        closeWith: ['button']
-                    }).show();
                 }
-            })
+                if (ButtonPressed === "Batal") {
+                    $.smallBox({
+                        title : "Batal!",
+                        content : "<i class='fa fa-clock-o'></i> <i>Data tersimpan</i>",
+                        color : "#3276B1",
+                        iconSmall : "fa fa-warning fa-2x fadeInRight animated",
+                        timeout : 3000
+                    });
+                }
+            });
         });
-        
     });
 </script>
 @endpush

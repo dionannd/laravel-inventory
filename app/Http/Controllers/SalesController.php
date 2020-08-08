@@ -17,15 +17,48 @@ class SalesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $customer   = Customer::all();
         $product    = Product::all();
         $finance    = Finance::all();
-        $last_no    = Sales::max('id') + 25;
-        $invoice = 'INV/' . date('ym') . $last_no;
-        // $filter = MsFinance::where('category', '=' ,'Penjualan')->get();
-        return view('backend.sales', compact('customer', 'product', 'invoice', 'finance', 'filter'));
+        $last_no    = rand();
+        $invoice = 'INV/'.date('ym').$last_no;
+        if ($request->ajax()) {
+            $sales = Sales::with('customer', 'product', 'finance')->get();
+            return DataTables::of($sales)
+            ->addIndexColumn()
+            ->addColumn('action', function ($row) {
+                if ($row->status == 'pending') {
+                    $approve = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Approve" class="btn btn-warning btn-sm approve"><i class="fa fa-clock-o"></i></a>';
+                    $delete = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete"><i class="fa fa-trash-o"></i></a>';
+                    $btn = $approve.' '.$delete.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
+                    return $btn;
+                } else {
+                    $invo = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Show Invoice" class="btn btn-default btn-sm invoice"><i class="fa fa-file-archive-o"></i></a>';
+                    $btn = $invo. ' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Detail" class="btn btn-default btn-sm detail"><i class="fa fa-search"></i></a>';
+                    return $btn;
+                }
+            })
+            ->editColumn('status', function($row){
+                if ($row->status == 'approve'){
+                    return '<span class="label label-success">'.ucfirst($row->status).'</span>';
+                } else {
+                    return '<span class="label label-danger">'.ucfirst($row->status).'</span>';
+                }
+            })
+            ->editColumn('product', function($row){
+                $product = '<strong>'.$row->product->name.'</strong>';
+                return $product;
+            })
+            ->editColumn('created_at', function($row){
+                return ''.$row->created_at->format('D, d-m-Y').'';
+            })
+            ->rawColumns(['action'])
+            ->escapeColumns([])
+            ->make(true);
+        }
+        return view('backend.sales', compact('customer', 'product', 'invoice', 'finance'));
     }
 
     /**
@@ -42,18 +75,16 @@ class SalesController extends Controller
             'finance_id'   => 'required',
             'product_id'   => 'required',
             'qty'          => 'required',
-            'desc'         => 'nullable',
+            'desc'         => 'required',
             'price'        => 'required',
             'cost'         => 'required',
-            'total'        => 'required',
+            'total'        => 'required'
         ];
         $validator = Validator::make($request->all(), $rule);
         if ($validator->fails()) {
-            return response()->json(['error'        => 'Kesalahan saat mengisi form!'], 422);
+            return response()->json(['error'        => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'], 422);
         }
-        $sales = Sales::updateOrCreate([
-            'id'          => $request->id
-        ], [
+        $sales = Sales::updateOrCreate(['id' => $request->id], [
             'invoice'     => $request->invoice,
             'customer_id' => $request->customer_id,
             'finance_id'  => $request->finance_id,
@@ -65,19 +96,12 @@ class SalesController extends Controller
             'total'       => $request->total
         ]);
         $product = Product::where('id', $request->product_id)->first();
-        $finance = Finance::where('id', $request->finance_id)->first();
         if ($sales) {
             if ($product->qty <= $request->qty) {
                 $sales->delete();
-                return response()->json(['error'    => 'Jumlah barang tidak cukup!'], 500);
+                return response()->json(['error'    => '<i class="fa fa-clock-o"></i> <i>Stock barang tidak cukup!</i>'], 500);
             } else {
-                $qtyResult = $product->qty - $request->qty;
-                $product->update(['qty'             => $qtyResult]);
-
-                $balanceResult = $finance->balance + $request->total;
-                $finance->update(['balance'         => $balanceResult]);
-
-                return response()->json(['success'  => 'Data berhasil disimpan!'], 200);
+                return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>'], 200);
             }
         } else {
             return response()->json(['error'        => 'Simpan gagal!'], 500);
@@ -121,43 +145,10 @@ class SalesController extends Controller
     {
         $sales = Sales::find($id)->delete();
         if ($sales) {
-            return response()->json(['success'  => 'Data berhasil dihapus!']);
+            return response()->json(['success'  => '<i class="fa fa-clock-o"></i> <i>Data berhasil dihapus!</i>']);
         } else {
             return response()->json(['error'    => 'Hapus gagal!']);
         }
-    }
-
-    public function data(Request $request)
-    {
-        $sales = Sales::with('customer', 'product', 'finance');
-        return DataTables::of($sales)
-            ->addIndexColumn()
-            ->addColumn('action', function ($item) {
-                return '<div class="list-icons">
-                            <div class="dropdown">
-                                <a href="#" class="list-icons-item" data-toggle="dropdown">
-                                    <i class="icon-menu9"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="' . route('sales.show', ['id' => $item->id]) . '" class="dropdown-item"><i class="icon-file-eye"></i> Invoice</a>
-                                    <a href="#" class="dropdown-item delete" data-id="' . $item->id . '"><i class="icon-cross2"></i> Hapus</a>
-                                </div>
-                            </div>
-                        </div>';
-            })
-            ->editColumn('price', function($item) {
-                return 'Rp. ' . number_format($item->price, 0) . '';
-            })
-            ->editColumn('subtotal', function($item) {
-                return 'Rp. ' . number_format($item->subtotal, 0) . '';
-            })
-            ->editColumn('cost', function($item) {
-                return 'Rp. ' . number_format($item->cost, 0) . '';
-            })
-            ->editColumn('total', function($item) {
-                return 'Rp. ' . number_format($item->total, 0) . '';
-            })
-            ->make(true);
     }
 
     public function getPrice(Request $request)
@@ -168,6 +159,28 @@ class SalesController extends Controller
         } else {
             return response()->json(['error' => 'Data failed', 'data' => $product], 404);
         }
+    }
+
+    public function approve($id)
+    {
+        $sales = Sales::find($id);
+        if ($sales) {
+            $qty     = $sales->product->qty - $sales->qty;
+            $sales_qty = $sales->product->sales_qty + $sales->qty;
+            $balance = $sales->finance->balance + $sales->total;
+            $sales->update([
+                'status' => 'approve'
+            ]);
+            $sales->product->update([
+                'qty' => $qty,
+                'sales_qty' => $sales_qty
+            ]);
+            $sales->finance->update([
+                'balance' => $balance
+            ]);
+            return response()->json(['success' => '<i class="fa fa-clock-o"></i> <i>Aprrove berhasil!</i>']);
+        }
+        return response()->json(['error' => 'Gagal Approve!']);
     }
 
     public function invoice(Request $request, $id)

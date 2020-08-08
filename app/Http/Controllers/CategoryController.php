@@ -47,7 +47,7 @@ class CategoryController extends Controller
         $validation = Validator::make($input, $rule);
         if($validation->fails()){
             return response()->json([
-                'message' => '<i class="fa fa-clock-o"></i> Tolong isi semua form yang ada!'
+                'error' => '<i class="fa fa-clock-o"></i> <i>Tolong isi semua form yang ada!</i>'
             ], 422);
         }
         $category = Category::updateOrCreate(['id' => $request->id], [
@@ -55,8 +55,8 @@ class CategoryController extends Controller
             'desc'  => $request->desc
         ]);
         return response()->json([
-            'success'   => '<i class="fa fa-clock-o"></i> Data berhasil disimpan!',
-            'data'      => $category
+            'success'   => '<i class="fa fa-clock-o"></i> <i>Data berhasil disimpan!</i>,
+                            <i>Kategori: <strong>'.$request->name.'</strong> telah ditambahkan.</i>'
         ], 200);
     }
 
@@ -80,9 +80,10 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $category = Category::find($id)->delete();
+        $category = Category::find($id);
+        $category->delete();
         return response()->json([
-            'success'   => '<i class="fa fa-clock-o"></i> <i>Data berhasil dihapus!'
-        ]);
+            'success'   => '<i class="fa fa-clock-o"></i> <i>Kategori: <strong>'.$category->name.'</strong> berhasil dihapus!'
+        ], 200);
     }
 }

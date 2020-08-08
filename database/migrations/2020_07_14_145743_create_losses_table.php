@@ -16,11 +16,13 @@ class CreateLossesTable extends Migration
         Schema::create('losses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('invoice')->constrained('purchases')->onDelete('cascade');
+            $table->string('product_id');
             $table->integer('qty');
             $table->integer('price');
-            $table->date('date');
+            $table->dateTime('date');
             $table->string('total');
             $table->text('desc')->nullable();
+            $table->enum('status', ['checking','checked'])->default('checking');
             $table->timestamps();
         });
     }

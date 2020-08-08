@@ -20,7 +20,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::group(['middleware' => 'auth:web'], function(){
-    Route::get('/home', 'HomeController@index')->name('home');
+    Route::get('home', 'HomeController@index')->name('home');
     // Category Route
     Route::resource('category', 'CategoryController');
     // Place Route
@@ -32,12 +32,13 @@ Route::group(['middleware' => 'auth:web'], function(){
     // Supplier Route
     Route::resource('supplier', 'SupplierController');
     // Sales Route
+    Route::get('sales/{id}', 'SalesController@approve')->name('sales.approve');
     Route::get('sales/show/{id}', 'SalesController@show')->name('sales.show');
     Route::post('sales/price', 'SalesController@getPrice')->name('sales.price');
     Route::resource('sales', 'SalesController');
     // Purchase Route
+    Route::get('purchase/{id}', 'PurchaseController@approve')->name('purchase.approve');
     Route::get('purchase/export_pdf/{id}', 'PurchaseController@export_pdf')->name('purchase.pdf');
-    Route::get('purchase/approve/{id}', 'PurchaseController@approve')->name('purchase.approve');
     Route::get('purchase/show/{id}', 'PurchaseController@show')->name('purchase.show');
     Route::resource('purchase', 'PurchaseController');
     // Finance Route
@@ -47,6 +48,7 @@ Route::group(['middleware' => 'auth:web'], function(){
     // Income Route
     Route::resource('income', 'IncomeController');
     // Loss Route
-    Route::post('/loss/purchase', 'LossController@getData')->name('loss.getdata');
+    Route::get('loss/{id}', 'LossController@checking')->name('loss.check');
+    Route::post('loss/data', 'LossController@getData')->name('loss.getdata');
     Route::resource('loss', 'LossController');
 });

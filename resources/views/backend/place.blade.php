@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
             <h1 class="page-title txt-color-blueDark">
-                <i class="fa fa-dropbox fa-fw "></i> 
+                <i class="fa fa-cubes fa-fw "></i> 
                     Master Barang
                 <span>>  
                     Tempat Barang
@@ -45,9 +45,9 @@
                 <table id="table" class="table table-striped table-bordered table-hover" width="100%">
                     <thead>
                         <tr>
-                            <th width="30px">NO</th>
-                            <th>TEMPAT BARANG</th>
-                            <th>DESKRIPSI</th>
+                            <th data-hide="phone" width="30px">NO</th>
+                            <th data-class="expand"><i class="fa fa-fw fa-archive text-muted hidden-md hidden-sm hidden-xs"></i> TEMPAT BARANG</th>
+                            <th data-hide="phone,tablet"><i class="fa fa-fw fa-comment text-muted hidden-md hidden-sm hidden-xs"></i> DESKRIPSI</th>
                             <th width="80px" class="text-center">AKSI</th>
                         </tr>
                     </thead>
@@ -65,33 +65,39 @@
                 <h4 class="modal-title" id="modal-header"></h4>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <form id="form" name="form" class="form">
-                            @csrf
-                            <input type="hidden" name="id" id="id">
-                            <div class="form-group">
-                                <label for="name">Nama Tempat:*</label>
-                                <input type="text" id="name" name="name" placeholder="Masukan Nama Kategori" class="form-control" required>
+                <form id="form"
+                data-bv-message="Value ini tidak valid"
+                data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+                data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+                data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+                    @csrf
+                    <input type="hidden" name="id" id="id">
+                    <div class="form-group">
+                        <label class="control-label" for="name">Nama Tempat:<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Masukan Nama Tempat Barang"
+                        required
+                        data-bv-notempty-message="Form tidak boleh kosong">
+                        <span class="text-danger">{{ $errors->first('name') }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="desc">Deskripsi:</label>
+                        <textarea name="desc" id="desc" rows="3" cols="3" placeholder="Masukan Deskripsi" class="form-control"
+                        required
+                        data-bv-notempty-message="Form tidak boleh kosong"></textarea>
+                        <span class="text-danger">{{ $errors->first('desc') }}</span>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
                             </div>
-                            <div class="form-group">
-                                <label for="desc">Deskripsi:</label>
-                                <textarea name="desc" id="desc" rows="3" cols="3" placeholder="Masukan Deskripsi" class="form-control"></textarea>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary" id="save" value="create">Simpan</button>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="row">
-                    <div class="col-md-6">
-                        <span class="text-muted mr-auto">Keterangan: Tanda <code>(*)</code> wajib diisi!</span>
-                    </div>
-                    <div class="col-md-6">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="save" value="create">Simpan <i class="fa fa-send"></i></button>
-                    </div>
-                </div>
+                </form>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -102,7 +108,13 @@
 @push('scripts')
 <script type="text/javascript">
 	$(document).ready(function(){
+
 		// Function DataTable
+        var responsiveTable = undefined;
+        var breakpointDefinition = {
+            tablet : 1024,
+            phone : 480
+        };
 		var table = $('#table').DataTable({
 			serverSide: true,
             responsive: true,
@@ -113,16 +125,34 @@
 				{data: 'name', name: 'name'},
                 {data: 'desc', name: 'desc'},
                 {data: 'action', orderable: false, searchable: false}
-			]
+			],
+            sDom: "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-12 hidden-xs'l>r>"+
+                "t"+
+                "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-xs-12 col-sm-6'p>>",
+            
+            preDrawCallback : function() {
+                if (!responsiveTable) {
+                    responsiveTable = new ResponsiveDatatablesHelper($('#table'), breakpointDefinition);
+                }
+            },
+            rowCallback : function(nRow) {
+                responsiveTable.createExpandIcon(nRow);
+            },
+            drawCallback : function(oSettings) {
+                responsiveTable.respond();
+            }
 		})
+
 		// Function Click Create
 		$('#create').click(function(){
 			$('#save').val('create');
             $('#id').val('');
             $('#form').trigger('reset');
-            $('#modal-header').html('Tambah Tempat Baru');
+            $('#modal-header').html('Tambah Tempat Barang');
             $('#modal').modal('show');
+            $('#form').bootstrapValidator('resetForm', true);
 		})
+
 		// Function Click Save in Modal
 		$('#save').on('click', function(e){
 			e.preventDefault();
@@ -138,7 +168,7 @@
                     $('#modal').modal('hide');
                     table.draw();
 					$.bigBox({
-                        title : "Berhasil!",
+                        title : "<i>Berhasil!</i>",
                         content : data.success,
                         color : "#739E73",
                         timeout: 4000,
@@ -149,8 +179,8 @@
                     console.log('Error', data);
                     $('#save').html('Simpan');
 					$.smallBox({
-                        title : "Error!",
-                        content : "<i class='fa fa-clock-o'></i>Tolong isi semua form yang ada.",
+                        title : "<i>Error!</i>",
+                        content : data.responseJSON.error,
                         color : "#C46A69",
                         iconSmall : "fa fa-exclamation-circle bounce animated",
                         timeout : 4000
@@ -158,6 +188,7 @@
                 }
             })
 		});
+
 		// Function Click Edit
 		$('body').on('click', '.edit', function(){
 			var id = $(this).data('id');
@@ -170,6 +201,7 @@
 				$('#desc').val(data.desc);
 			})
 		});
+
 		// Function Click Delete
 	    $('body').on('click', '.delete', function(){
 	        var id = $(this).data('id');
@@ -189,7 +221,7 @@
                         success: function(data){
                             table.draw();
 	                        $.smallBox({
-                                title : "Berhasil",
+                                title : "<i>Berhasil!</i>",
                                 content : data.success,
                                 color : "#659265",
                                 iconSmall : "fa fa-check fa-2x fadeInRight animated",
@@ -200,7 +232,7 @@
                 }
                 if (ButtonPressed === "Batal") {
                     $.smallBox({
-                        title : "Batal!",
+                        title : "<i>Batal!</i>",
                         content : "<i class='fa fa-clock-o'></i> <i>Data tersimpan</i>",
                         color : "#3276B1",
                         iconSmall : "fa fa-warning fa-2x fadeInRight animated",
