@@ -1,5 +1,8 @@
-# inventory-v2.0
-Make your inventory with application
+# myInvent Apps
+Manage your inventory sales or warehouse with application
+
+# Requiretments
+Check Laravel Doc for requiretments **[here](https://laravel.com/docs/7.x/installation)**
 
 # Installation
 - Copy .env.exmaple to .env
@@ -8,3 +11,6 @@ Make your inventory with application
 - composer install
 - php artisan key:generate
 - php artisan migrate
+
+# Created
+By me.
