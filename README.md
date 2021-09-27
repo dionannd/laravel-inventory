@@ -1,10 +1,10 @@
-# myInvent Apps with Laravel Ajax
+## myInvent Apps with Laravel Ajax
 Manage your inventory sales or warehouse with application
 
-# Requiretments
+## Requiretments
 Check Laravel Doc for requiretments **[here](https://laravel.com/docs/7.x/installation)**
 
-# Installation
+## Installation
 - Copy .env.exmaple to .env
 - Change Database in file .env to your Database
 - open terminal and write :
@@ -12,7 +12,7 @@ Check Laravel Doc for requiretments **[here](https://laravel.com/docs/7.x/instal
 - and then, run php artisan key:generate
 - last, run php artisan migrate
 
-# Created
+## Created
 By me.
 
-# Thanks
+## Thanks
